@@ -11,8 +11,8 @@ public class TripsService : ITripsService
     {
         var trips = new List<TripDTO>();
 
-        string command = "SELECT IdTrip, Name FROM Trip";
-        
+        string command = "SELECT IdTrip, Name, Description, DateFrom, DateTo, MaxPeople FROM Trip";
+
         using (SqlConnection conn = new SqlConnection(_connectionString))
         using (SqlCommand cmd = new SqlCommand(command, conn))
         {
@@ -23,19 +23,26 @@ public class TripsService : ITripsService
                 while (await reader.ReadAsync())
                 {
                     int idOrdinal = reader.GetOrdinal("IdTrip");
-                    trips.Add(new TripDTO()
+
+                    var trip = new TripDTO()
                     {
                         Id = reader.GetInt32(idOrdinal),
-                        Name = reader.GetString(1),
-                    });
+                        Name = reader.GetString(reader.GetOrdinal("Name")),
+                        Description = reader.GetString(reader.GetOrdinal("Description")),
+                        DateFrom = reader.GetDateTime(reader.GetOrdinal("DateFrom")),
+                        DateTo = reader.GetDateTime(reader.GetOrdinal("DateTo")),
+                        MaxPeople = reader.GetInt32(reader.GetOrdinal("MaxPeople")),
+                        Countries = await GetCountriesByTripId(reader.GetInt32(idOrdinal))
+                    };
+
+                    trips.Add(trip);
                 }
             }
         }
-        
 
         return trips;
     }
-    
+
     public async Task<bool> DoesTripExist(int id)
     {
         string command = "SELECT COUNT(1) FROM Trip WHERE IdTrip = @Id";

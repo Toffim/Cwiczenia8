@@ -27,7 +27,7 @@ namespace Tutorial8.Controllers
             var trips = await _tripsService.GetTripsByClientId(id);
             if (trips == null || !trips.Any())
             {
-                return Ok(new List<TripDTO>());
+                return NotFound($"Client with ID {id} does not have any trips.");
             }
 
             return Ok(trips);
