@@ -72,7 +72,7 @@ public class TripsService : ITripsService
             {
                 if (await reader.ReadAsync())
                 {
-                    return new TripDTO()
+                    var trip = new TripDTO()
                     {
                         Id = reader.GetInt32(reader.GetOrdinal("IdTrip")),
                         Name = reader.GetString(reader.GetOrdinal("Name")),
@@ -82,6 +82,8 @@ public class TripsService : ITripsService
                         MaxPeople = reader.GetInt32(reader.GetOrdinal("MaxPeople")),
                         Countries = await GetCountriesByTripId(id)
                     };
+
+                    return trip;
                 }
             }
         }
