@@ -9,6 +9,7 @@ public class ClientsService : IClientsService
 
     public async Task<bool> DoesClientExist(int clientId)
     {
+        // Selects the client by id
         string command = "SELECT COUNT(1) FROM Client WHERE IdClient = @ClientId";
 
         using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -26,6 +27,7 @@ public class ClientsService : IClientsService
     {
         var trips = new List<ClientTripDTO>();
 
+        // Returns trip information and registered/payment from joined table
         string command = @"
             SELECT t.IdTrip, t.Name, t.Description, t.DateFrom, t.DateTo, t.MaxPeople, 
                    ct.RegisteredAt, ct.PaymentDate
@@ -58,7 +60,7 @@ public class ClientsService : IClientsService
                         Countries = new List<CountryDTO>()
                     };
 
-                    // Now, we'll fetch the associated countries for this trip
+                    // Fetch countries associated with the trip id
                     var countryCommand = @"
                         SELECT c.IdCountry, c.Name
                         FROM Country c

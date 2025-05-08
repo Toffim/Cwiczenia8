@@ -11,6 +11,7 @@ public class TripsService : ITripsService
     {
         var trips = new List<TripDTO>();
 
+        // Selects all trips and their information
         string command = "SELECT IdTrip, Name, Description, DateFrom, DateTo, MaxPeople FROM Trip";
 
         using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -45,6 +46,7 @@ public class TripsService : ITripsService
 
     public async Task<bool> DoesTripExist(int id)
     {
+        // Selects trip by id
         string command = "SELECT COUNT(1) FROM Trip WHERE IdTrip = @Id";
             
         using (SqlConnection conn = new SqlConnection(_connectionString))
@@ -61,8 +63,7 @@ public class TripsService : ITripsService
     
     public async Task<TripDTO> GetTrip(int id)
     {
-        // We use @" to allow for multilines, also below I use parameters to avoid sql injections, even though
-        // Its probably hard to make it unsafe with just `int` stuff.
+        // Selects trip's information (by id)
         string command = @"
         SELECT IdTrip, Name, Description, DateFrom, DateTo, MaxPeople
         FROM Trip
@@ -102,6 +103,7 @@ public class TripsService : ITripsService
     {
         var countries = new List<CountryDTO>();
 
+        // Selects countries the trip is associated with
         string command = @"
         SELECT c.IdCountry, c.Name
         FROM Country_Trip ct
