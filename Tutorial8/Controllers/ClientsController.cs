@@ -33,5 +33,19 @@ namespace Tutorial8.Controllers
 
             return Ok(trips);
         }
+        
+        // POST /api/clients
+        // Creates new client in database
+        [HttpPost]
+        public async Task<IActionResult> CreateClient(ClientDTO clientDTO)
+        {
+            if (clientDTO == null || string.IsNullOrEmpty(clientDTO.FirstName) || string.IsNullOrEmpty(clientDTO.LastName) || string.IsNullOrEmpty(clientDTO.Email))
+            {
+                return BadRequest("Invalid client data.");
+            }
+
+            int clientId = await _clientsService.CreateClient(clientDTO);
+            return Ok(clientId);
+        }
     }
 }

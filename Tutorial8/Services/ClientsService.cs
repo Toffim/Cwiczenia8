@@ -90,4 +90,28 @@ public class ClientsService : IClientsService
 
         return trips;
     }
+    
+    public async Task<int> CreateClient(ClientDTO clientDTO)
+    {
+        // Inserts client to database. SCOPE_IDENTITY is for returning the last generated id.
+        string command = @"
+        INSERT INTO Client (FirstName, LastName, Email, Telephone, Pesel)
+        VALUES (@FirstName, @LastName, @Email, @Telephone, @Pesel);
+        SELECT SCOPE_IDENTITY();";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        using (SqlCommand cmd = new SqlCommand(command, conn))
+        {
+            cmd.Parameters.AddWithValue("@FirstName", clientDTO.FirstName);
+            cmd.Parameters.AddWithValue("@LastName", clientDTO.LastName);
+            cmd.Parameters.AddWithValue("@Email", clientDTO.Email);
+            cmd.Parameters.AddWithValue("@Telephone", clientDTO.Telephone);
+            cmd.Parameters.AddWithValue("@Pesel", clientDTO.Pesel);
+
+            await conn.OpenAsync();
+
+            var result = await cmd.ExecuteScalarAsync();
+            return Convert.ToInt32(result);
+        }
+    }
 }
