@@ -8,4 +8,5 @@ public interface IClientsService
     Task<bool> DoesClientExist(int clientId);
 
     Task<int> CreateClient(ClientDTO clientDTO);
+    Task<bool> IsValidClientData(ClientDTO clientDto);
 }

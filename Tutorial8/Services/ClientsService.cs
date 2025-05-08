@@ -114,4 +114,16 @@ public class ClientsService : IClientsService
             return Convert.ToInt32(result);
         }
     }
+
+    public async Task<bool> IsValidClientData(ClientDTO clientDto)
+    {
+        // Checking class members validation
+        return !(
+            string.IsNullOrEmpty(clientDto.FirstName) 
+            || string.IsNullOrEmpty(clientDto.LastName) 
+            || string.IsNullOrEmpty(clientDto.Email)
+            || string.IsNullOrEmpty(clientDto.Telephone)
+            || string.IsNullOrEmpty(clientDto.Pesel)
+        );
+    }
 }

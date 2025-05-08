@@ -39,7 +39,7 @@ namespace Tutorial8.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateClient(ClientDTO clientDTO)
         {
-            if (clientDTO == null || string.IsNullOrEmpty(clientDTO.FirstName) || string.IsNullOrEmpty(clientDTO.LastName) || string.IsNullOrEmpty(clientDTO.Email))
+            if (!await _clientsService.IsValidClientData(clientDTO))
             {
                 return BadRequest("Invalid client data.");
             }
