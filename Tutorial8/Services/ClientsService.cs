@@ -22,12 +22,13 @@ public class ClientsService : IClientsService
         }
     }
 
-    public async Task<List<TripDTO>> GetTripsByClientId(int clientId)
+    public async Task<List<ClientTripDTO>> GetTripsByClientId(int clientId)
     {
-        var trips = new List<TripDTO>();
+        var trips = new List<ClientTripDTO>();
 
         string command = @"
-            SELECT t.IdTrip, t.Name, t.Description, t.DateFrom, t.DateTo, t.MaxPeople
+            SELECT t.IdTrip, t.Name, t.Description, t.DateFrom, t.DateTo, t.MaxPeople, 
+                   ct.RegisteredAt, ct.PaymentDate
             FROM Trip t
             JOIN Client_Trip ct ON t.IdTrip = ct.IdTrip
             WHERE ct.IdClient = @ClientId";
@@ -42,7 +43,7 @@ public class ClientsService : IClientsService
             {
                 while (await reader.ReadAsync())
                 {
-                    var trip = new TripDTO()
+                    var clientTrip = new ClientTripDTO()
                     {
                         Id = reader.GetInt32(reader.GetOrdinal("IdTrip")),
                         Name = reader.GetString(reader.GetOrdinal("Name")),
@@ -50,23 +51,28 @@ public class ClientsService : IClientsService
                         DateFrom = reader.GetDateTime(reader.GetOrdinal("DateFrom")),
                         DateTo = reader.GetDateTime(reader.GetOrdinal("DateTo")),
                         MaxPeople = reader.GetInt32(reader.GetOrdinal("MaxPeople")),
+                        RegisteredAt = reader.GetInt32(reader.GetOrdinal("RegisteredAt")), // Assuming RegisteredAt is an integer
+                        PaymentDate = reader.IsDBNull(reader.GetOrdinal("PaymentDate")) 
+                                      ? (int?)null 
+                                      : reader.GetInt32(reader.GetOrdinal("PaymentDate")), // Handle nullability for PaymentDate
                         Countries = new List<CountryDTO>()
                     };
 
+                    // Now, we'll fetch the associated countries for this trip
                     var countryCommand = @"
-                    SELECT c.IdCountry, c.Name
-                    FROM Country c
-                    INNER JOIN Country_Trip ct ON c.IdCountry = ct.IdCountry
-                    WHERE ct.IdTrip = @TripId";
+                        SELECT c.IdCountry, c.Name
+                        FROM Country c
+                        INNER JOIN Country_Trip ct ON c.IdCountry = ct.IdCountry
+                        WHERE ct.IdTrip = @TripId";
 
                     using (var countryCmd = new SqlCommand(countryCommand, conn))
                     {
-                        countryCmd.Parameters.AddWithValue("@TripId", trip.Id);
+                        countryCmd.Parameters.AddWithValue("@TripId", clientTrip.Id);
                         using (var countryReader = await countryCmd.ExecuteReaderAsync())
                         {
                             while (await countryReader.ReadAsync())
                             {
-                                trip.Countries.Add(new CountryDTO()
+                                clientTrip.Countries.Add(new CountryDTO()
                                 {
                                     Id = countryReader.GetInt32(countryReader.GetOrdinal("IdCountry")),
                                     Name = countryReader.GetString(countryReader.GetOrdinal("Name"))
@@ -75,7 +81,7 @@ public class ClientsService : IClientsService
                         }
                     }
 
-                    trips.Add(trip);
+                    trips.Add(clientTrip);
                 }
             }
         }
