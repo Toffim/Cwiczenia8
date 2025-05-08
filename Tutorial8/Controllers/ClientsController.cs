@@ -16,6 +16,7 @@ namespace Tutorial8.Controllers
             _clientsService = clientsService;
         }
 
+        // Returns all trips of a client specified by id
         [HttpGet("{id}/trips")]
         public async Task<IActionResult> GetTripsByClientId(int id)
         {

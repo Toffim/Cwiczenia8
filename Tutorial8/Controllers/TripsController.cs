@@ -16,6 +16,7 @@ namespace Tutorial8.Controllers
             _tripsService = tripsService;
         }
 
+        // Returns all trips and their information
         [HttpGet]
         public async Task<IActionResult> GetTrips()
         {
@@ -23,6 +24,8 @@ namespace Tutorial8.Controllers
             return Ok(trips);
         }
 
+        // This is the endpoint I did for myself, despite it not being in the assignment.
+        // Returns trip information by trip id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTrip(int id)
         {
