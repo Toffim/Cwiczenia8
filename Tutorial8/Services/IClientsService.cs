@@ -11,4 +11,6 @@ public interface IClientsService
     Task<bool> IsValidClientData(ClientDTO clientDto);
 
     Task<bool> RegisterClientToTrip(int clientId, int tripId);
+
+    Task<bool> UnregisterClientFromTrip(int clientId, int tripId);
 }

@@ -71,5 +71,32 @@ namespace Tutorial8.Controllers
 
             return Ok("Client successfully registered.");
         }
+        
+        [HttpDelete("{clientId}/trips/{tripId}")]
+        public async Task<IActionResult> UnregisterClientFromTrip(int clientId, int tripId)
+        {
+            if (!await _clientsService.DoesClientExist(clientId))
+            {
+                return NotFound($"Client with ID {clientId} not found.");
+            }
+
+            if (!await _tripsService.DoesTripExist(tripId))
+            {
+                return NotFound($"Trip with ID {tripId} not found.");
+            }
+
+            if (!await _tripsService.IsClientAlreadyRegistered(clientId, tripId))
+            {
+                return NotFound($"Client with ID {clientId} is not registered to trip with ID {tripId}.");
+            }
+
+            bool deleted = await _clientsService.UnregisterClientFromTrip(clientId, tripId);
+            if (!deleted)
+            {
+                return Problem( "Failed to delete registration.");
+            }
+
+            return Ok("Client successfully unregistered from the trip.");
+        }
     }
 }

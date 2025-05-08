@@ -147,4 +147,21 @@ public class ClientsService : IClientsService
             return rowsAffected > 0;
         }
     }
+    
+    public async Task<bool> UnregisterClientFromTrip(int clientId, int tripId)
+    {
+        // Simple delete
+        string command = "DELETE FROM Client_Trip WHERE IdClient = @ClientId AND IdTrip = @TripId";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        using (SqlCommand cmd = new SqlCommand(command, conn))
+        {
+            cmd.Parameters.AddWithValue("@ClientId", clientId);
+            cmd.Parameters.AddWithValue("@TripId", tripId);
+
+            await conn.OpenAsync();
+            int affectedRows = await cmd.ExecuteNonQueryAsync();
+            return affectedRows > 0;
+        }
+    }
 }
