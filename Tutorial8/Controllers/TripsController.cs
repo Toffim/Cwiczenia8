@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tutorial8.Models.DTOs;
 using Tutorial8.Services;
 
 namespace Tutorial8.Controllers
