@@ -9,4 +9,6 @@ public interface IClientsService
 
     Task<int> CreateClient(ClientDTO clientDTO);
     Task<bool> IsValidClientData(ClientDTO clientDto);
+
+    Task<bool> RegisterClientToTrip(int clientId, int tripId);
 }

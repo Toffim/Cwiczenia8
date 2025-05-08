@@ -10,10 +10,12 @@ namespace Tutorial8.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly IClientsService _clientsService;
+        private readonly ITripsService _tripsService;
 
-        public ClientsController(IClientsService clientsService)
+        public ClientsController(IClientsService clientsService, ITripsService tripsService)
         {
             _clientsService = clientsService;
+            _tripsService = tripsService;
         }
 
         // Returns all trips of a client specified by id
@@ -46,6 +48,28 @@ namespace Tutorial8.Controllers
 
             int clientId = await _clientsService.CreateClient(clientDTO);
             return Ok(clientId);
+        }
+        
+        [HttpPut("{clientId}/trips/{tripId}")]
+        public async Task<IActionResult> RegisterClientToTrip(int clientId, int tripId)
+        {
+            if (!await _clientsService.DoesClientExist(clientId))
+            {
+                return NotFound($"Client with ID {clientId} not found.");
+            }
+            
+            if (!await _tripsService.canRegisterClient(tripId, clientId))
+            {
+                return Problem($"Trip with ID {tripId} cannot register the client.");
+            }
+
+            var result = await _clientsService.RegisterClientToTrip(clientId, tripId);
+            if (!result)
+            {
+                return Problem($"Couldn't register client to a trip. ClientId {clientId}, TripId {tripId}");
+            }
+
+            return Ok("Client successfully registered.");
         }
     }
 }

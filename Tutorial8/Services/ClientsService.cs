@@ -126,4 +126,25 @@ public class ClientsService : IClientsService
             || string.IsNullOrEmpty(clientDto.Pesel)
         );
     }
+
+    public async Task<bool> RegisterClientToTrip(int clientId, int tripId)
+    {
+        // Inserts to database the registration details
+        const string command = @"
+        INSERT INTO Client_Trip (IdClient, IdTrip, RegisteredAt)
+        VALUES (@ClientId, @TripId, @RegisteredAt)";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        using (SqlCommand cmd = new SqlCommand(command, conn))
+        {
+            cmd.Parameters.AddWithValue("@ClientId", clientId);
+            cmd.Parameters.AddWithValue("@TripId", tripId);
+            cmd.Parameters.AddWithValue("@RegisteredAt", (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+
+            await conn.OpenAsync();
+
+            int rowsAffected = await cmd.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
+        }
+    }
 }

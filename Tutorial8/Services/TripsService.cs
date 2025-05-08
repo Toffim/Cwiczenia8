@@ -132,4 +132,72 @@ public class TripsService : ITripsService
 
         return countries;
     }
+    
+    public async Task<bool> IsTripFull(int tripId)
+    {
+        // Counts People registered and also takes param MaxPeople, to later compare them
+        string command = @"
+        SELECT 
+            (SELECT COUNT(*) FROM Client_Trip WHERE IdTrip = @TripId) AS RegisteredCount,
+            (SELECT MaxPeople FROM Trip WHERE IdTrip = @TripId) AS MaxPeople";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        using (SqlCommand cmd = new SqlCommand(command, conn))
+        {
+            cmd.Parameters.AddWithValue("@TripId", tripId);
+            await conn.OpenAsync();
+
+            using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                if (await reader.ReadAsync())
+                {
+                    int registeredCount = reader.GetInt32(reader.GetOrdinal("RegisteredCount"));
+                    int maxPeople = reader.GetInt32(reader.GetOrdinal("MaxPeople"));
+
+                    return registeredCount >= maxPeople;
+                }
+            }
+        }
+
+        return true;
+    }
+    
+    // Checks if client is already registered for a trip
+    public async Task<bool> IsClientAlreadyRegistered(int clientId, int tripId)
+    {
+        // Checks if there is already client in a trip, in the database
+        const string command = @"
+        SELECT COUNT(1)
+        FROM Client_Trip
+        WHERE IdClient = @ClientId AND IdTrip = @TripId";
+
+        using (SqlConnection conn = new SqlConnection(_connectionString))
+        using (SqlCommand cmd = new SqlCommand(command, conn))
+        {
+            cmd.Parameters.AddWithValue("@ClientId", clientId);
+            cmd.Parameters.AddWithValue("@TripId", tripId);
+
+            await conn.OpenAsync();
+            var result = await cmd.ExecuteScalarAsync();
+            return Convert.ToInt32(result) > 0;
+        }
+    }
+
+    // Returns true if client can be registered to the trip
+    public async Task<Boolean> canRegisterClient(int tripId, int clientId)
+    {
+        bool tripExists = await DoesTripExist(tripId);
+        if (!tripExists)
+            return false;
+        
+        bool tripIsFull = await IsTripFull(tripId);
+        if (tripIsFull)
+            return false;
+
+        bool clientAlreadyRegistered = await IsClientAlreadyRegistered(clientId, tripId);
+        if (clientAlreadyRegistered)
+            return false;
+
+        return true;
+    }
 }
